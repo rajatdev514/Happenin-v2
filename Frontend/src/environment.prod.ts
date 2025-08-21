@@ -10,13 +10,14 @@ export const environment = {
     getAllEvents: '/events',
     createEvent: '/events',
     getEventsByOrganizer: (organizerId: string) => `/events/${organizerId}`,
-    // getEventsByOrganizer: (organizerId: string) => `/events/by-organizer/{organizerId}`,
+    getEventsByOrganizerAndStatus: (organizerId: string, status: string) =>
+      `/events/by-organizer/${organizerId}/status/${status}`,
     updateEvent: (eventId: string) => `/events/${eventId}`,
     deleteEvent: (eventId: string) => `/events/${eventId}`,
     registeredEvents: (userId: string) => `/events/registered-events/${userId}`,
     registerForEvent: '/events/register',
     deregisterForEvent: '/events/deregister',
-    getUpcomingEvent: '/events/Approved',
+    getUpcomingEvent: '/events/approved',
     getExpiredEvent: '/events/expired',
 
     // Registrations
@@ -33,19 +34,20 @@ export const environment = {
     // viewLocation: (locationId: string) => `/locations/${locationId}`,
     viewLocation: (locationId: string) => `/locations`,
     // deleteLocation: (locationId: string) => `/locations/${locationId}`,
-   deleteLocation: (locationId: string) => `/locations/${locationId}`,
+    deleteLocation: (locationId: string) => `/locations/${locationId}`,
 
     //Approvals
     // approveEvent: `/approval/approveEvent`,
     // denyEvent: (eventId: string) => `/approval/deny/${eventId}`,
     // inside apis: { ... }
-updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
+    updateEventStatus: (eventId: string) => `/events/${eventId}/status`,
 
     // viewApprovalRequests: '/events/Pending',
     // viewApprovalRequestById: (requestId: string) =>
     //   `/approval/viewrequests/${requestId}`,
-      viewApprovalRequests: '/events/Pending',
-  viewApprovalRequestById: (requestId: string) => `/approval/viewrequests/${requestId}`,
+    viewApprovalRequests: '/events/Pending',
+    viewApprovalRequestById: (requestId: string) =>
+      `/approval/viewrequests/${requestId}`,
 
     //users
     registerUser: '/users/register',

@@ -14,8 +14,7 @@ RUN dotnet publish HappeninApi.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
-EXPOSE 10000
 
 # Run app on port 10000
-ENV ASPNETCORE_URLS=http://+:10000
+ENV ASPNETCORE_URLS=http://+:${PORT}
 ENTRYPOINT ["dotnet", "HappeninApi.dll"]

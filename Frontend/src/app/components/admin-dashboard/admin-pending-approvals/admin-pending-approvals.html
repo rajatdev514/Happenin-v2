@@ -1,0 +1,209 @@
+<app-header
+  [title]="'Pending Approvals'"
+  [buttons]="adminButtons"
+  (buttonClick)="handleHeaderAction($event)"
+>
+</app-header>
+
+<div class="main-content">
+  <div>
+    <!-- No pending events message -->
+    <div *ngIf="events.length === 0" class="no-events-message">
+      <h3>No pending events for approval</h3>
+      <p>All events have been reviewed.</p>
+      <button class="btn btn-primary" (click)="handleHeaderAction('dashboard')">
+        Back to Dashboard
+      </button>
+    </div>
+
+    <div class="admin-events-grid">
+      <div *ngFor="let event of events" class="admin-event-card">
+        <div class="event-header">
+          <h3>{{ event.title }}</h3>
+          <span class="event-category" *ngIf="event.category"
+            >{{ event.category }}</span
+          >
+        </div>
+
+        <div class="event-details">
+          <p><strong>Date:</strong> {{ event.date | date: 'MMM d, y' }}</p>
+          <p><strong>Time:</strong> {{ event.timeSlot }}</p>
+          <p><strong>Location:</strong> {{ event.location.city }}</p>
+          <p><strong>Price:</strong> ₹{{ event.price }}</p>
+          <p *ngIf="event.artist">
+            <strong>Artist:</strong> {{ event.artist }}
+          </p>
+          <p *ngIf="event.organization">
+            <strong>Organization:</strong> {{ event.organization }}
+          </p>
+        </div>
+
+        <div class="event-actions">
+          <!-- Deny Event Button -->
+          <button
+            class="delete-btn"
+            (click)="confirmDenyEvent(event.id || event._id || '', event.title, event.date, event.timeSlot, event.locationId || '')"
+            [attr.aria-label]="'Deny event titled ' + event.title + ' scheduled on ' + event.date + ' during ' + event.timeSlot"
+          >
+            Deny Event
+          </button>
+
+          <!-- View Details Button -->
+          <button
+            class="view-details-btn"
+            (click)="showEventDetail(event)"
+            [attr.aria-label]="'View details of event titled ' + event.title"
+          >
+            <span class="btn-text">Details</span>
+          </button>
+
+          <!-- Approve Event Button -->
+          <button
+            class="delete-btn"
+            (click)="confirmApproveEvent(event.id || event._id || '', event.title)"
+            [attr.aria-label]="'Approve event titled ' + event.title"
+          >
+            Approve Event
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-pagination
+  [currentPage]="currentPage"
+  [totalPages]="totalPages"
+  (pageChanged)="onPageChange($event)"
+>
+</app-pagination>
+
+<!-- Event Details Modal (if you have one) -->
+<div
+  *ngIf="showEventDetails && selectedEvent"
+  class="admin-modal-overlay"
+  (click)="closeEventDetails()"
+>
+  <div class="admin-event-modal" (click)="$event.stopPropagation()">
+    <div class="admin-modal-header">
+      <h2 class="admin-modal-title">{{ selectedEvent.title }}</h2>
+      <button
+        class="admin-modal-close-btn"
+        (click)="closeEventDetails()"
+        aria-label="Close event details"
+      >
+        <span>✕</span>
+      </button>
+    </div>
+    <div class="admin-modal-content" *ngIf="selectedEvent">
+      <div class="admin-modal-category">
+        <span class="admin-category-badge"
+          >{{ selectedEvent.category || 'Event' }}</span
+        >
+      </div>
+      <div class="admin-modal-description">
+        <h3>About This Event</h3>
+        <p>{{ selectedEvent.description }}</p>
+      </div>
+      <div class="admin-modal-details-grid">
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">📅</span>
+            <span class="admin-detail-title">Date & Time</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>
+              <strong>Date:</strong> {{ selectedEvent.date | date: 'MMM d, y' }}
+            </p>
+            <p><strong>Time:</strong> {{ selectedEvent.timeSlot }}</p>
+            <p><strong>Duration:</strong> {{ selectedEvent.duration }}</p>
+          </div>
+        </div>
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">📍</span>
+            <span class="admin-detail-title">Location</span>
+          </div>
+          <div class="admin-detail-content">
+            <p><strong>City:</strong> {{ selectedEvent.location.city }}</p>
+          </div>
+        </div>
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">💰</span>
+            <span class="admin-detail-title">Pricing</span>
+          </div>
+          <div class="admin-detail-content">
+            <p class="admin-price-highlight">₹{{ selectedEvent.price }}</p>
+          </div>
+        </div>
+        <div class="admin-modal-detail-card">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">👥</span>
+            <span class="admin-detail-title">Capacity</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>Max {{ selectedEvent.maxRegistrations }} attendees</p>
+          </div>
+        </div>
+        <div class="admin-modal-detail-card" *ngIf="selectedEvent.artist">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">🎭</span>
+            <span class="admin-detail-title">Artist</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>{{ selectedEvent.artist }}</p>
+          </div>
+        </div>
+        <div class="admin-modal-detail-card" *ngIf="selectedEvent.organization">
+          <div class="admin-detail-header">
+            <span class="admin-detail-icon">🏢</span>
+            <span class="admin-detail-title">Organization</span>
+          </div>
+          <div class="admin-detail-content">
+            <p>{{ selectedEvent.organization }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal-actions">
+        <!-- Approve Event Button -->
+        <button
+          class="admin-modal-approve-btn"
+          (click)="confirmApproveEvent(selectedEvent.id || selectedEvent._id || '', selectedEvent.title); closeEventDetails()"
+          [attr.aria-label]="'Approve event titled ' + selectedEvent.title"
+        >
+          <span class="btn-icon" aria-hidden="true">✅</span>
+          <span class="btn-text">Approve Event</span>
+        </button>
+
+        <!-- Deny Event Button -->
+        <button
+          class="admin-modal-delete-btn"
+          (click)="confirmDenyEvent(
+      selectedEvent.id || selectedEvent._id || '',
+      selectedEvent.title,
+      selectedEvent.date,
+      selectedEvent.timeSlot,
+      selectedEvent.location.city || ''
+    ); closeEventDetails()"
+          [attr.aria-label]="'Deny event titled ' + selectedEvent.title + ', scheduled on ' + selectedEvent.date + ' at ' + selectedEvent.timeSlot + ' in ' + (selectedEvent.location.city || 'unknown location')"
+        >
+          <span class="btn-icon" aria-hidden="true">🗑️</span>
+          <span class="btn-text">Deny Event</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Alert Component -->
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>
+
+<app-footer></app-footer>

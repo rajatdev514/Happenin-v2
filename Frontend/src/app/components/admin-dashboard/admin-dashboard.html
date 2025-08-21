@@ -1,0 +1,500 @@
+<div class="admin-dashboard-container">
+  <app-header
+    [title]="'Admin Panel'"
+    [buttons]="adminButtons"
+    (buttonClick)="handleHeaderAction($event)"
+  >
+  </app-header>
+
+  <div class="admin-buttons-row">
+    <!-- Add New Admin Button -->
+    <button
+      *ngIf="isSuperAdmin"
+      class="add-admin-btn"
+      (click)="toggleRegisterForm()"
+      aria-label="Add a new administrator"
+    >
+      <span aria-hidden="true">➕</span> Add New Admin
+    </button>
+
+    <!-- Add Location Button (visible when form is not shown) -->
+    <ng-container *ngIf="!showLocationForm">
+      <button
+        class="add-location-btn"
+        (click)="toggleLocationForm()"
+        aria-label="Add a new location"
+        [attr.aria-expanded]="showLocationForm"
+        aria-controls="location-form"
+      >
+        <span aria-hidden="true">📍</span> Add Location
+      </button>
+    </ng-container>
+
+    <!-- Close Location Form Button (visible when form is shown) -->
+    <ng-container *ngIf="showLocationForm">
+      <button
+        class="close-location-btn"
+        (click)="toggleLocationForm()"
+        aria-label="Close the location form"
+        [attr.aria-expanded]="showLocationForm"
+        aria-controls="location-form"
+      >
+        <span aria-hidden="true">✖</span> Close Location Form
+      </button>
+    </ng-container>
+
+    <!-- View All Locations Button -->
+    <button
+      class="view-locations-btn"
+      (click)="toggleViewLocations()"
+      aria-label="View all saved locations"
+      aria-controls="locations-list"
+    >
+      <span aria-hidden="true">👁️</span> View All Locations
+    </button>
+  </div>
+
+  <div
+    class="locations-modal-overlay"
+    *ngIf="showViewLocations"
+    (click)="closeViewLocations()"
+  >
+    <div class="locations-modal" (click)="$event.stopPropagation()">
+      <div class="locations-modal-header">
+        <h2 class="locations-modal-title">All Locations</h2>
+        <button
+          class="locations-modal-close-btn"
+          (click)="closeViewLocations()"
+          aria-label="Close locations view"
+        >
+          <span>✕</span>
+        </button>
+      </div>
+
+      <div class="locations-modal-content">
+        <div class="locations-count">
+          <span>Total Locations: {{ locations.length }}</span>
+        </div>
+
+        <div
+          class="locations-grid"
+          *ngIf="locations.length > 0; else noLocations"
+        >
+          <div *ngFor="let location of locations" class="location-card">
+            <div class="location-header">
+              <h3>{{ location.placeName }}</h3>
+              <span class="location-capacity"
+                >Capacity: {{ location.maxSeatingCapacity }}</span
+              >
+            </div>
+
+            <div class="location-details">
+              <p><strong>State:</strong> {{ location.state }}</p>
+              <p><strong>City:</strong> {{ location.city }}</p>
+              <p><strong>Address:</strong> {{ location.address }}</p>
+              <div
+                class="location-amenities"
+                *ngIf="location.amenities && location.amenities.length > 0"
+              >
+                <strong>Amenities:</strong>
+                <div class="amenities-tags">
+                  <span
+                    *ngFor="let amenity of location.amenities"
+                    class="amenity-tag"
+                    >{{ amenity }}</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="location-actions">
+              <button
+                class="delete-location-btn"
+                (click)="confirmDeleteLocation(location.id || '', location.placeName, location.city, location.state)"
+                title="Delete Location"
+              >
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noLocations>
+          <div class="no-locations">
+            <p>No locations found. Add your first location!</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Form -->
+  <div *ngIf="showLocationForm" class="admin-location-section">
+    <h3>Add New Location</h3>
+
+    <form
+      #locationForm="ngForm"
+      (ngSubmit)="addLocation(newLocation)"
+      class="location-form"
+      novalidate
+    >
+      <!-- First Row: State and City -->
+      <div class="admin-form-row">
+        <!-- State -->
+        <div class="admin-form-group">
+          <label for="stateSelect">State:</label>
+          <select
+            id="stateSelect"
+            [(ngModel)]="newLocation.state"
+            name="state"
+            required
+            (change)="onStateChange()"
+            class="form-select"
+          >
+            <option value="" disabled>Select State</option>
+            <option *ngFor="let state of getStates()" [value]="state">
+              {{ state }}
+            </option>
+          </select>
+        </div>
+
+        <!-- City -->
+        <div class="admin-form-group">
+          <label for="citySelect">City:</label>
+          <select
+            id="citySelect"
+            [(ngModel)]="newLocation.city"
+            name="city"
+            required
+            class="form-select"
+          >
+            <option value="" disabled>Select City</option>
+            <option *ngFor="let city of availablecitys" [value]="city">
+              {{ city }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Second Row: Place Name & Seating -->
+      <div class="admin-form-row">
+        <div class="admin-form-group">
+          <label for="placeNameInput">Place Name:</label>
+          <input
+            id="placeNameInput"
+            type="text"
+            [(ngModel)]="newLocation.placeName"
+            name="placeName"
+            required
+            class="form-input"
+          />
+        </div>
+
+        <div class="admin-form-group">
+          <label for="maxSeatingInput">Max Seating Capacity:</label>
+          <input
+            id="maxSeatingInput"
+            type="number"
+            [(ngModel)]="newLocation.maxSeatingCapacity"
+            name="maxSeatingCapacity"
+            min="31"
+            #maxCap="ngModel"
+            required
+            class="form-input"
+          />
+          <div class="error" *ngIf="maxCap.invalid && maxCap.touched">
+            <span *ngIf="maxCap.errors?.['min']"
+              >Seating capacity must be greater than 30.</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="admin-form-group">
+        <label for="addressTextarea">Address:</label>
+        <textarea
+          id="addressTextarea"
+          [(ngModel)]="newLocation.address"
+          name="address"
+          required
+          class="form-textarea"
+        ></textarea>
+      </div>
+
+      <!-- Amenities -->
+      <div class="admin-form-group">
+        <label>Amenities:</label>
+        <div class="amenities-checkboxes">
+          <label *ngFor="let amenity of amenities" class="checkbox-label">
+            <input
+              type="checkbox"
+              [value]="amenity"
+              (change)="toggleAmenity(amenity, $event)"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">{{ amenity }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Submit and Close Buttons at Bottom -->
+      <div class="form-actions">
+        <button
+          type="submit"
+          [disabled]="!locationForm.form.valid"
+          class="submit-btn"
+        >
+          ✅ Submit Location
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Admin Registration Form -->
+  <div *ngIf="showRegisterForm" class="form-modal-overlay">
+    <div class="admin-register-form">
+      <!-- Close button -->
+      <button class="close-button" (click)="toggleRegisterForm()">×</button>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+        <input formControlName="name" placeholder="Name" />
+        <input formControlName="email" placeholder="Email" type="email" />
+        <input
+          formControlName="password"
+          placeholder="Password"
+          type="password"
+        />
+        <input formControlName="phone" placeholder="Phone Number" />
+        <button type="submit" [disabled]="registerForm.invalid">
+          Register Admin
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    <!-- Upcoming Events Card -->
+    <div
+      class="dashboard-card upcoming-events"
+      (click)="navigateToPage('/admin-upcoming-events')"
+      (keydown.enter)="navigateToPage('/admin-upcoming-events')"
+      (keydown.space)="navigateToPage('/admin-upcoming-events')"
+      tabindex="0"
+      role="button"
+    >
+      <div class="card-icon">📅</div>
+      <img
+        src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+        alt="Upcoming Events"
+        class="card-image"
+      />
+      <div class="card-content">
+        <h3 class="card-title">Upcoming Events</h3>
+        <p class="card-description">
+          Manage and view all scheduled events that are coming up. Monitor
+          registrations and event details.
+        </p>
+        <button class="card-button">View Events</button>
+      </div>
+    </div>
+
+    <!-- Expired Events Card -->
+    <div
+      class="dashboard-card expired-events"
+      (click)="navigateToPage('/admin-expired-events')"
+      (keydown.enter)="navigateToPage('/admin-expired-events')"
+      (keydown.space)="navigateToPage('/admin-expired-events')"
+      tabindex="0"
+      role="button"
+    >
+      <div class="card-icon">⏰</div>
+      <img
+        src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+        alt="Expired Events"
+        class="card-image"
+      />
+      <div class="card-content">
+        <h3 class="card-title" id="expired-events-title">Expired Events</h3>
+
+        <p class="card-description" id="expired-events-desc">
+          Review past events, analyze attendance data, and archive completed
+          event information.
+        </p>
+
+        <button
+          class="card-button"
+          aria-label="View expired events"
+          aria-labelledby="expired-events-title expired-events-desc"
+        >
+          View Expired
+        </button>
+      </div>
+    </div>
+
+    <!-- Waiting for Approval Card -->
+    <div
+      class="dashboard-card waiting-approval"
+      (click)="navigateToPage('/admin-pending-approvals')"
+      (keydown.enter)="navigateToPage('/admin-pending-approvals')"
+      (keydown.space)="navigateToPage('/admin-pending-approvals')"
+      tabindex="0"
+      role="button"
+    >
+      <div class="card-icon">⏳</div>
+      <img
+        src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+        alt="Waiting for Approval"
+        class="card-image"
+      />
+      <div class="card-content">
+        <h3 class="card-title" id="pending-events-title">
+          Waiting for Approval
+        </h3>
+
+        <p class="card-description" id="pending-events-desc">
+          Review and approve pending event submissions. Manage event approval
+          workflow efficiently.
+        </p>
+
+        <button
+          class="card-button"
+          aria-labelledby="pending-events-title pending-events-desc"
+        >
+          Review Pending
+        </button>
+      </div>
+    </div>
+
+    <!-- Analytics Card -->
+    <div
+      class="dashboard-card analytics"
+      (click)="navigateToPage('/admin-analytics')"
+      (keydown.enter)="navigateToPage('/admin-analytics')"
+      (keydown.space)="navigateToPage('/admin-analytics')"
+      tabindex="0"
+      role="button"
+    >
+      <div class="card-icon">📊</div>
+      <img
+        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+        alt="Analytics"
+        class="card-image"
+      />
+      <div class="card-content">
+        <h3 class="card-title" id="analytics-title">Analytics</h3>
+
+        <p class="card-description" id="analytics-desc">
+          View comprehensive reports, statistics, and insights about events,
+          attendance, and performance metrics.
+        </p>
+
+        <button
+          class="card-button"
+          aria-labelledby="analytics-title analytics-desc"
+        >
+          View Analytics
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Data Cards Section -->
+  <div class="user-data-section">
+    <h2 class="section-title" id="user-data-title">User Data Management</h2>
+
+    <div class="user-data-cards">
+      <!-- All Users Card -->
+      <div class="user-data-card users-card">
+        <div class="user-data-icon" aria-hidden="true">👥</div>
+        <div class="user-data-content">
+          <h4 id="users-title">All Users</h4>
+          <p class="user-count" id="users-desc">{{ userCounts.users }} users</p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('users')"
+            [disabled]="downloadingData.users"
+            [attr.aria-busy]="downloadingData.users"
+            aria-labelledby="users-title users-desc"
+            [attr.aria-label]="downloadingData.users ? 'Downloading users data' : 'Download all users data as Excel file'"
+          >
+            <span *ngIf="!downloadingData.users" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.users" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
+          </button>
+        </div>
+      </div>
+
+      <!-- All Organizers Card -->
+      <div class="user-data-card organizers-card">
+        <div class="user-data-icon" aria-hidden="true">🎭</div>
+        <div class="user-data-content">
+          <h4 id="organizers-title">All Organizers</h4>
+          <p class="user-count" id="organizers-desc">
+            {{ userCounts.organizers }} organizers
+          </p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('organizers')"
+            [disabled]="downloadingData.organizers"
+            [attr.aria-busy]="downloadingData.organizers"
+            aria-labelledby="organizers-title organizers-desc"
+            [attr.aria-label]="downloadingData.organizers ? 'Downloading organizers data' : 'Download all organizers data as Excel file'"
+          >
+            <span *ngIf="!downloadingData.organizers" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.organizers" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
+          </button>
+        </div>
+      </div>
+
+      <!-- All Admins Card -->
+      <div class="user-data-card admins-card">
+        <div class="user-data-icon" aria-hidden="true">🛡️</div>
+        <div class="user-data-content">
+          <h4 id="admins-title">All Admins</h4>
+          <p class="user-count" id="admins-desc">
+            {{ userCounts.admins }} admins
+          </p>
+          <button
+            class="download-btn"
+            (click)="downloadUserData('admins')"
+            [disabled]="downloadingData.admins"
+            [attr.aria-busy]="downloadingData.admins"
+            aria-labelledby="admins-title admins-desc"
+            [attr.aria-label]="downloadingData.admins ? 'Downloading admins data' : 'Download all admins data as Excel file'"
+          >
+            <span *ngIf="!downloadingData.admins" aria-hidden="true"
+              >📥 Download Excel</span
+            >
+            <span *ngIf="downloadingData.admins" aria-hidden="true"
+              >⏳ Downloading...</span
+            >
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-footer
+    brandName="Happenin' Admin"
+    contactEmail="happenin.events.app@gmail.com"
+    [showSocials]="false"
+  >
+  </app-footer>
+</div>
+
+<app-custom-alert
+  [alertData]="customAlert"
+  [autoCloseDuration]="2000"
+  (alertClosed)="closeAlert()"
+  (alertConfirmed)="handleAlertConfirm()"
+  (alertCancelled)="handleAlertCancel()"
+>
+</app-custom-alert>

@@ -1,0 +1,726 @@
+// Color Variables
+$primary-blue: #4f46e5;
+$light-blue: #e0e7ff;
+$purple: #7c3aed;
+$violet: #8b5cf6;
+$light-purple: #f3f4ff;
+$white: #ffffff;
+$gray-light: #f8fafc;
+$gray-medium: #64748b;
+$gray-dark: #334155;
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+
+// Mixins
+
+@mixin border-radius($radius) {
+  -webkit-border-radius: $radius;
+  -moz-border-radius: $radius;
+  border-radius: $radius;
+}
+
+@mixin card-shadow {
+  -webkit-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  -moz-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                   0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+@mixin transform($transforms) {
+  -webkit-transform: $transforms;
+  -moz-transform: $transforms;
+  -ms-transform: $transforms;
+  transform: $transforms;
+}
+
+@mixin card-shadow-hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+              0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@mixin button-gradient($color1, $color2) {
+  background: $color1; // Fallback
+  background: -webkit-linear-gradient(135deg, $color1 0%, $color2 100%);
+  background: -moz-linear-gradient(135deg, $color1 0%, $color2 100%);
+  background: -o-linear-gradient(135deg, $color1 0%, $color2 100%);
+  background: linear-gradient(135deg, $color1 0%, $color2 100%);
+}
+
+@mixin flex-center {
+  @include flexbox;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+// Text truncation mixins
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  // Fallback for non-webkit browsers
+  @supports not (-webkit-line-clamp: $lines) {
+    max-height: #{$lines * 1.4}em; // Approximate line height
+    line-height: 1.4;
+  }
+}
+
+@mixin flexbox {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+@mixin grid($columns) {
+  display: -ms-grid;
+  display: grid;
+  grid-template-columns: $columns;
+  -ms-grid-columns: $columns;
+}
+
+// Base Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, $light-blue 0%, $light-purple 100%);
+  min-height: 100vh;
+  line-height: 1.6;
+  color: $gray-dark;
+}
+
+// Main Content
+.main-content {
+  padding: 2rem 0;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+// Section Header
+.events-section {
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    .section-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: $gray-dark;
+      margin-bottom: 1rem;
+      position: relative;
+
+      .title-icon {
+        font-size: 2.5rem;
+        animation: bounce 2s infinite;
+      }
+
+      .title-underline {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 4px;
+        border-radius: 2px;
+
+        &.registered-underline {
+          @include button-gradient($primary-blue, $violet);
+        }
+      }
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: $white;
+  border-radius: 24px;
+  @include card-shadow;
+  max-width: 500px;
+  margin: 0 auto;
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .empty-message {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $gray-dark;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-submessage {
+    color: $gray-medium;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+
+  .browse-events-btn {
+    @include flex-center;
+    gap: 0.75rem;
+    @include button-gradient($primary-blue, $violet);
+    color: $white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      @include card-shadow-hover;
+    }
+
+    .btn-icon {
+      font-size: 1.2rem;
+      animation: pulse 2s infinite;
+    }
+  }
+}
+
+// Enhanced Events Grid - 3 cards per row with better spacing
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  padding: 1rem 0;
+  
+  // Ensure equal height cards
+  align-items: stretch;
+}
+
+// Enhanced Event Cards with better proportions and alignment
+.event-card {
+  position: relative;
+  background: $white;
+  border-radius: 24px;
+  overflow: hidden;
+  @include card-shadow;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  height: 100%; // Ensures equal height
+
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    @include card-shadow-hover;
+
+    .card-shine {
+      opacity: 1;
+      animation: shine 1.5s ease-in-out;
+    }
+
+    .registered-badge {
+      transform: scale(1.1);
+    }
+
+    .event-title {
+      color: $primary-blue;
+    }
+  }
+
+  .card-gradient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+
+    &.registered-bg {
+      @include button-gradient($primary-blue, $violet);
+    }
+  }
+
+  .card-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    opacity: 0;
+    transition: all 0.6s ease;
+    pointer-events: none;
+  }
+
+  .card-content {
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    flex: 1; // Takes up remaining space
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    .event-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: $gray-dark;
+      line-height: 1.3;
+      flex: 1;
+      transition: color 0.3s ease;
+      
+      // Truncate title if too long
+      @include text-truncate;
+      max-width: calc(100% - 120px); // Account for badge width
+    }
+
+    .registered-badge {
+      background: linear-gradient(135deg, #4caf50, #45a049);
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+
+      .badge-icon {
+         font-size: 0.8rem;
+  font-weight: bold;
+      }
+      .badge-text {
+  font-weight: 700;
+}
+    }
+  }
+
+  .registered-event-card {
+  .card-header {
+    margin-bottom: 0.5rem; // Reduce margin since we have category below
+  }
+
+  .event-category {
+    background: rgb(154, 180, 203);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    margin-bottom: 1rem;
+    display: inline-block;
+    width: fit-content;
+  }
+}
+
+  .event-description {
+    color: $gray-medium;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    flex-grow: 1; // Takes up available space
+    
+    // Truncate description to 3 lines
+    @include text-truncate-multiline(2);
+    // min-height: 2.8rem; // Consistent height for 3 lines
+  }
+
+  .event-details {
+    margin-bottom: 2rem;
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      padding: 0.50rem;
+      background: rgba($light-blue, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba($light-blue, 0.5);
+        transform: translateX(4px);
+      }
+
+      .detail-icon {
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .detail-label {
+        font-weight: 600;
+        color: $gray-dark;
+        min-width: 60px;
+        flex-shrink: 0;
+      }
+
+      .detail-value {
+        color: $gray-medium;
+        font-weight: 500;
+        @include text-truncate;
+        flex: 1;
+      }
+
+      &.price-item {
+        background: linear-gradient(135deg, rgba($warning, 0.1) 0%, rgba($warning, 0.05) 100%);
+        border: 1px solid rgba($warning, 0.2);
+
+        .price-value {
+          font-weight: 700;
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  .card-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto; // Pushes to bottom
+
+    .download-ticket-btn {
+  position: relative;
+  background: linear-gradient(145deg, #28a745, #20963d);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3), 0 8px 16px rgba(40, 167, 69, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(40, 167, 69, 0.4), 0 12px 24px rgba(40, 167, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.4), 0 4px 8px rgba(40, 167, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow:
+      0 4px 8px rgba(40, 167, 69, 0.3),
+      0 8px 16px rgba(40, 167, 69, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 3px rgba(40, 167, 69, 0.3);
+  }
+
+  .btn-icon {
+    font-weight: bold;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-text {
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  // Ripple effect
+  .btn-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+    pointer-events: none;
+  }
+
+  // Shine effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    left: 100%;
+  }
+}
+    .deregister-button {
+  position: relative;
+  background: linear-gradient(145deg, #dc3545, #c82333);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3), 0 8px 16px rgba(220, 53, 69, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(220, 53, 69, 0.4), 0 12px 24px rgba(220, 53, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(220, 53, 69, 0.4), 0 4px 8px rgba(220, 53, 69, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow:
+      0 4px 8px rgba(220, 53, 69, 0.3),
+      0 8px 16px rgba(220, 53, 69, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 0 3px rgba(220, 53, 69, 0.3);
+  }
+
+  .btn-text {
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  // Ripple effect
+  .btn-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+    pointer-events: none;
+  }
+
+  // Shine effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    left: 100%;
+  }
+}
+  }
+}
+
+// Animations
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+// Enhanced Responsive Design
+@media (max-width: 1200px) {
+  .container {
+    max-width: 1200px;
+    padding: 0 1.5rem;
+  }
+  
+  .events-grid {
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .events-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  .container {
+    padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .event-card {
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+
+      .event-title {
+        max-width: 100%;
+        @include text-truncate-multiline(2);
+        // white-space: normal;
+      }
+
+      .registered-badge {
+        align-self: flex-end;
+      }
+    }
+
+    .card-actions {
+      flex-direction: column;
+
+      .download-ticket-btn,
+      .deregister-button {
+        width: 100%;
+      }
+    }
+  }
+
+  .section-title {
+    font-size: 2rem !important;
+    flex-direction: column;
+    gap: 0.5rem !important;
+
+    .title-icon {
+      font-size: 2rem !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem 0;
+  }
+
+  .events-section .section-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem !important;
+  }
+
+  .event-card .card-content {
+    padding: 1.25rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+    margin: 0 1rem;
+  }
+}

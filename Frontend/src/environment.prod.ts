@@ -2,8 +2,8 @@ import { send } from '@emailjs/browser';
 
 export const environment = {
   production: false,
-  // apiBaseUrl: 'https://happenin-byma.onrender.com/api',
-  apiBaseUrl: 'http://localhost:5134/api',
+  apiBaseUrl: 'https://happenin-api.onrender.com/api',
+  // apiBaseUrl: 'http://localhost:5134/api',
 
   apis: {
     // Events

@@ -15,11 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost4200", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .WithOrigins("http://localhost:4200", "https://happenin-frontend.onrender.com") // Replace with actual Render frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -116,7 +117,8 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // 3. Middleware pipeline
-app.UseCors("AllowLocalhost4200");
+app.UseCors("AllowFrontend");
+
 
 app.UseAuthentication(); // 🟢 Must come before UseAuthorization
 app.UseAuthorization();

@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: happenin-api
+    env: dotnet
+    buildCommand: dotnet publish Backend/HappeninApi/HappeninApi.csproj -c Release -o out
+    startCommand: dotnet out/HappeninApi.dll
+    plan: free
+    envVars:
+      - key: ASPNETCORE_URLS
+        value: http://+:10000
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: MongoSettings__ConnectionString
+        sync: false
+      - key: MongoSettings__DatabaseName
+        value: HappeninDB
+      - key: Jwt__Key
+        sync: false
+      - key: Jwt__Issuer
+        value: happenin-api
+      - key: Jwt__Audience
+        value: happenin-client
